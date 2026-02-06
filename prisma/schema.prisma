@@ -1,0 +1,55 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Challenge {
+  id          String      @id @default(cuid())
+  title       String
+  description String
+  totalDays   Int
+  creatorId   String
+  creatorName String      @default("Anonymous")
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  checkins    CheckIn[]
+  subscribers Subscriber[]
+  likes       Like[]
+}
+
+model CheckIn {
+  id          String    @id @default(cuid())
+  challengeId String
+  userId      String
+  day         Int
+  proof       String
+  createdAt   DateTime  @default(now())
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+
+  @@unique([challengeId, userId, day])
+}
+
+model Subscriber {
+  id          String    @id @default(cuid())
+  challengeId String
+  userId      String
+  userName    String    @default("Anonymous")
+  createdAt   DateTime  @default(now())
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+
+  @@unique([challengeId, userId])
+}
+
+model Like {
+  id          String    @id @default(cuid())
+  challengeId String
+  userId      String
+  createdAt   DateTime  @default(now())
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+
+  @@unique([challengeId, userId])
+}
